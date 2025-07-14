@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Discover Your Lover - Dice Roller & Timer</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 1rem;
+    background: #fff0f6;
+    color: #333;
+  }
+  h1 {
+    text-align: center;
+    color: #b03060;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  select, button {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0.25rem 1rem 0;
+    border-radius: 5px;
+    border: 1px solid #b03060;
+    background: #ffe6f0;
+    color: #b03060;
+    cursor: pointer;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background: #b03060;
+    color: white;
+  }
+  button:disabled {
+    background: #f5c9d7;
+    color: #b03060;
+    cursor: not-allowed;
+  }
+  #phaseTimerDisplay, #taskTimerDisplay, #shortTimerDisplay {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 1rem 0;
+    color: #b03060;
+  }
+  .timers {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 2rem;
+  }
+  .timer-box {
+    border: 2px solid #b03060;
+    border-radius: 10px;
+    padding: 1rem;
+    width: 45%;
+    background: #fff0f6;
+  }
+  .timer-controls button {
+    margin: 0.25rem;
+  }
+  #rollResult {
+    font-size: 1.8rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 2px solid #b03060;
+    border-radius: 10px;
+    background: #ffe6f0;
+    min-height: 80px;
+    white-space: pre-wrap;
+    text-align: center;
+    font-weight: bold;
+    color: #b03060;
+  }
+  #popupOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right:0;
+    bottom:0;
+    background: rgba(176, 48, 96, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  #popupContent {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    max-width: 90%;
+    max-height: 80%;
+    overflow-y: auto;
+    text-align: center;
+    color: #b03060;
+  }
+  #popupContent button {
+    margin-top: 1.5rem;
+    background: #b03060;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .dice {
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    margin: 0 10px;
+    border-radius: 10px;
+    border: 3px solid #b03060;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #b03060;
+    user-select: none;
+    background: #ffe6f0;
+    vertical-align: middle;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+  }
+  #massageRollSection {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  #massageRollBtn {
+    background: #b03060;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  #massageResult {
+    font-size: 1.8rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 2px solid #b03060;
+    border-radius: 10px;
+    background: #ffe6f0;
+    min-height: 80px;
+    white-space: pre-wrap;
+    text-align: center;
+    font-weight: bold;
+    color: #b03060;
+  }
+  #massageRollBtn:hover {
+    background: #8a244a;
+  }
+  #massageRollBtn:disabled {
+    background: #f5c9d7;
+    cursor: not-allowed;
+  }
+  #mainContent {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 1rem;
+  }
+  #leftPanel, #rightPanel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  #diceAndResult {
+    border: 2px solid #b03060;
+    border-radius: 10px;
+    background: #ffe6f0;
+    padding: 1rem;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #tablesContainer {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+  }
+  #d20TableSection, #massageTableSection {
+    flex: 1;
+    border: 2px solid #b03060;
+    border-radius: 10px;
+    background: #ffe6f0;
+    padding: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  #d20TableSection h3, #massageTableSection h3 {
+    margin-top: 0;
+    text-align: center;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #b03060;
+  }
+  th, td {
+    border: 1px solid #b03060;
+    padding: 0.25rem 0.5rem;
+    text-align: center;
+  }
+  th {
+    background: #b03060;
+    color: white;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Discover Your Lover - Dice Roller & Timer</h1>
+  <label for="phaseSelect">Select Phase:</label>
+  <select id="phaseSelect">
+    <option value="affectionate">Affectionate Phase</option>
+    <option value="intimate">Intimate Phase</option>
+    <option value="passionate">Passionate Phase</option>
+  </select>
+
+  <div id="mainContent">
+ <div id="leftPanel">
+      <div id="tablesContainer">
+        <div id="d20TableSection">
+          <h3>Roll Table for <span id="currentPhaseName">Affectionate Phase</span></h3>
+          <table>
+            <thead>
+              <tr><th>Roll</th><th>Task/Question</th></tr>
+            </thead>
+            <tbody id="rollTableBody"></tbody>
+          </table>
+        </div>
+        <div id="massageTableSection">
+          <h3>Massage Roll Table</h3>
+          <table>
+            <thead>
+              <tr><th>Roll</th><th>Body Part</th></tr>
+            </thead>
+            <tbody id="massageTableBody"></tbody>
+          </table>
+   <div class="timers">
+          <div class="timer-box">
+            <h3>3 Minute Timer</h3>
+            <div id="taskTimerDisplay">03:00</div>
+            <div class="timer-controls">
+              <button data-timer="task" class="startBtn">Start</button>
+              <button data-timer="task" class="stopBtn">Stop</button>
+              <button data-timer="task" class="resetBtn">Reset</button>
+            </div>
+          </div>
+          <div class="timer-box">
+            <h3>30 Second Timer</h3>
+            <div id="shortTimerDisplay">00:30</div>
+            <div class="timer-controls">
+              <button data-timer="short" class="startBtn">Start</button>
+              <button data-timer="short" class="stopBtn">Stop</button>
+              <button data-timer="short" class="resetBtn">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div id="rightPanel">
+      <div id="diceAndResult">
+        <button id="rollDiceBtn">Roll D20 for Task</button>
+        <span id="d20Dice" class="dice" aria-label="D20 dice">-</span>
+        <div id="rollResult"></div>
+
+        <div id="massageRollSection">
+          
+          <button id="massageRollBtn">Roll D6 for Massage</button>
+          <span id="d6Dice" class="dice" aria-label="D6 dice">-</span>
+          <div id="massageResult" style="margin-top: 0.5rem; font-weight: bold; color: #b03060; text-align:center;"></div>
+        </div>
+
+        <div id="phaseTimerDisplay">Phase Timer: 30:00</div>
+        <div>
+          <button id="pausePhaseBtn">Pause</button>
+          <button id="extendPhaseBtn">Extend 5 minutes</button>
+          <button id="skipPhaseBtn">Skip to Next Phase</button>
+        </div>
+
+     
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+   
+
+<div id="popupOverlay">
+  <div id="popupContent">
+    <div id="popupText"></div>
+    <button id="popupCloseBtn">OK</button>
+  </div>
+</div>
+
+<script>
+  // Data tables as objects keyed by phase
+  const taskTables = {
+    affectionate: {
+      1: "easy question",
+      2: "easy question",
+      3: "difficult question",
+      4: "difficult question",
+      5: "Intimate question",
+      6: "affectionate task",
+      7: "Intimate question",
+      8: "Massage (max 3m)",
+      9: "Massage (max 3m)",
+      10: "affectionate task",
+      11: "Intimate question",
+      12: "affectionate task",
+      13: "Intimate question",
+      14: "affectionate task",
+      15: "affectionate task",
+      16: "Intimate question",
+      17: "Intimate task",
+      18: "Intimate task",
+      19: "Striptease of one piece of clothing",
+      20: "Have your partner take off one piece of your clothing*"
+    },
+    intimate: {
+      1: "Massage (max 3m)",
+      2: "Massage (max 3m)",
+      3: "difficult question",
+      4: "difficult question",
+      5: "intimate question",
+      6: "affectionate task",
+      7: "intimate question",
+      8: "affectionate task",
+      9: "intimate question",
+      10: "affectionate task",
+      11: "intimate task",
+      12: "intimate task",
+      13: "intimate question",
+      14: "intimate task",
+      15: "intimate task",
+      16: "intimate task",
+      17: "passionate task",
+      18: "passionate task",
+      19: "Have your partner take off one piece of your clothing*",
+      20: "Free pick"
+    },
+    passionate: {
+      1: "Massage",
+      2: "Massage",
+      3: "Massage",
+      4: "intimate question",
+      5: "intimate question",
+      6: "intimate question",
+      7: "intimate question",
+      8: "affectionate task",
+      9: "intimate question",
+      10: "intimate task",
+      11: "intimate task",
+      12: "intimate task",
+      13: "intimate task",
+      14: "intimate task",
+      15: "intimate task",
+      16: "Passionate task",
+      17: "Passionate task",
+      18: "Passionate task",
+      19: "Passionate task",
+      20: "Free pick"
+    }
+  };
+
+  const massageTables = {
+    affectionate: {
+      1: "Neck & shoulders",
+      2: "Upper back",
+      3: "Lower back",
+      4: "thighs and lower legs",
+      5: "feet",
+      6: "scalp"
+    },
+    intimate: {
+      1: "neck/shoulders/back",
+      2: "chest/breasts",
+      3: "butt",
+      4: "inner thighs",
+      5: "feet",
+      6: "genitals"
+    },
+    passionate: {
+      1: "chest/breasts",
+      2: "chest/breasts",
+      3: "butt & inner thighs",
+      4: "butt & inner thighs",
+      5: "genitals",
+      6: "genitals"
+    }
+  };
+
+  // Elements
+  const phaseSelect = document.getElementById("phaseSelect");
+  const rollDiceBtn = document.getElementById("rollDiceBtn");
+  const rollResult = document.getElementById("rollResult");
+  const phaseTimerDisplay = document.getElementById("phaseTimerDisplay");
+  const extendPhaseBtn = document.getElementById("extendPhaseBtn");
+  const skipPhaseBtn = document.getElementById("skipPhaseBtn");
+  const popupOverlay = document.getElementById("popupOverlay");
+  const popupText = document.getElementById("popupText");
+  const popupCloseBtn = document.getElementById("popupCloseBtn");
+
+  const d20Dice = document.getElementById("d20Dice");
+  const massageRollBtn = document.getElementById("massageRollBtn");
+  const d6Dice = document.getElementById("d6Dice");
+  const massageResult = document.getElementById("massageResult");
+
+  const pausePhaseBtn = document.getElementById("pausePhaseBtn");
+
+  const currentPhaseName = document.getElementById("currentPhaseName");
+  const rollTableBody = document.getElementById("rollTableBody");
+  const massageTableBody = document.getElementById("massageTableBody");
+
+  // Timers for phase and task timers
+  let phaseTimerSeconds = 30 * 60; // 30 minutes
+  let phaseTimerInterval = null;
+  let phaseTimerPaused = false;
+
+  // Task timers (3 min and 30 sec)
+  let taskTimers = {
+    task: { totalSeconds: 180, currentSeconds: 180, interval: null, display: document.getElementById("taskTimerDisplay") },
+    short: { totalSeconds: 30, currentSeconds: 30, interval: null, display: document.getElementById("shortTimerDisplay") }
+  };
+
+  // Utility function to format seconds as mm:ss
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  }
+
+  function updatePhaseTimerDisplay() {
+    phaseTimerDisplay.textContent = `Phase Timer: ${formatTime(phaseTimerSeconds)}`;
+  }
+
+  function startPhaseTimer() {
+    if (phaseTimerInterval) clearInterval(phaseTimerInterval);
+    phaseTimerPaused = false;
+    pausePhaseBtn.textContent = "Pause";
+    phaseTimerInterval = setInterval(() => {
+      if (!phaseTimerPaused && phaseTimerSeconds > 0) {
+        phaseTimerSeconds--;
+        updatePhaseTimerDisplay();
+        if (phaseTimerSeconds === 0) {
+          clearInterval(phaseTimerInterval);
+          showPopup("Phase time is up! Please move to the next phase.");
+        }
+      }
+    }, 1000);
+  }
+
+  function extendPhaseTime() {
+    phaseTimerSeconds += 5 * 60; // add 5 minutes
+    updatePhaseTimerDisplay();
+  }
+
+  function resetPhaseTimer() {
+    phaseTimerSeconds = 30 * 60;
+    updatePhaseTimerDisplay();
+  }
+
+  // Task timers control
+  function startTaskTimer(timerKey) {
+    const timer = taskTimers[timerKey];
+    if (timer.interval) clearInterval(timer.interval);
+    timer.interval = setInterval(() => {
+      if (timer.currentSeconds > 0) {
+        timer.currentSeconds--;
+        timer.display.textContent = formatTime(timer.currentSeconds);
+      } else {
+        clearInterval(timer.interval);
+        showPopup(`${timerKey === "task" ? "3-minute" : "30-second"} timer ended!`);
+      }
+    }, 1000);
+  }
+
+  function stopTaskTimer(timerKey) {
+    const timer = taskTimers[timerKey];
+    if (timer.interval) {
+      clearInterval(timer.interval);
+      timer.interval = null;
+    }
+  }
+
+  function resetTaskTimer(timerKey) {
+    const timer = taskTimers[timerKey];
+    stopTaskTimer(timerKey);
+    timer.currentSeconds = timer.totalSeconds;
+    timer.display.textContent = formatTime(timer.currentSeconds);
+  }
+
+  // Popup control
+  function showPopup(message) {
+    popupText.textContent = message;
+    popupOverlay.style.display = "flex";
+  }
+  function hidePopup() {
+    popupOverlay.style.display = "none";
+  }
+
+     // Dice roll helpers with animation
+  function animateDice(diceElement, sides, duration = 1000) {
+    return new Promise((resolve) => {
+      const startTime = Date.now();
+      let lastValue = 1;
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        if (elapsed >= duration) {
+          clearInterval(interval);
+          const finalRoll = rollDice(sides);
+          diceElement.textContent = finalRoll;
+          resolve(finalRoll);
+        } else {
+          // Show random number rapidly for spinning effect
+          let nextValue;
+          do {
+            nextValue = rollDice(sides);
+          } while (nextValue === lastValue);
+          lastValue = nextValue;
+          diceElement.textContent = nextValue;
+        }
+      }, 50);
+    });
+  }
+
+  function rollDice(sides) {
+    return Math.floor(Math.random() * sides) + 1;
+  }
+
+  // Main roll dice button handler
+  rollDiceBtn.addEventListener("click", async () => {
+    rollDiceBtn.disabled = true;
+    massageResult.textContent = "";
+    d6Dice.textContent = "-";
+    rollResult.textContent = "";
+    const phase = phaseSelect.value;
+
+    // Animate D20 roll
+    const d20Roll = await animateDice(d20Dice, 20);
+
+    let task = taskTables[phase][d20Roll];
+    rollResult.textContent = `${task}`;
+	showPopup(`${task}`);
+
+    // If task includes massage, remind about 3-minute timer
+    if (task.toLowerCase().includes("max 3m")) {
+      showPopup("Time to massage your Partner!! Roll a D6 to determine which part of their body you will have to massage. Use the 3-minute timer for this massage task.");
+    }
+
+    rollDiceBtn.disabled = false;
+  });
+
+  // Massage D6 roll button handler (always enabled)
+  massageRollBtn.addEventListener("click", async () => {
+    massageRollBtn.disabled = true;
+    massageResult.textContent = "";
+    d6Dice.textContent = "-";
+
+    const phase = phaseSelect.value;
+
+    // Animate D6 roll
+    const d6Roll = await animateDice(d6Dice, 6);
+
+    const bodyPart = massageTables[phase][d6Roll];
+    massageResult.textContent = `${bodyPart}`;
+
+    massageRollBtn.disabled = false;
+  });
+
+  // Pause/resume phase timer button
+  pausePhaseBtn.addEventListener("click", () => {
+    if (phaseTimerPaused) {
+      phaseTimerPaused = false;
+      pausePhaseBtn.textContent = "Pause";
+    } else {
+      phaseTimerPaused = true;
+      pausePhaseBtn.textContent = "Resume";
+    }
+  });
+
+  // Extend phase time button
+  extendPhaseBtn.addEventListener("click", () => {
+    extendPhaseTime();
+  });
+
+  // Skip phase button
+  skipPhaseBtn.addEventListener("click", () => {
+    clearInterval(phaseTimerInterval);
+    showPopup("Phase skipped. Please select the next phase and start the timer.");
+  });
+
+  // Task timer buttons
+  document.querySelectorAll(".startBtn").forEach(btn => {
+    btn.addEventListener("click", e => {
+      const timerKey = e.target.getAttribute("data-timer");
+      startTaskTimer(timerKey);
+    });
+  });
+  document.querySelectorAll(".stopBtn").forEach(btn => {
+    btn.addEventListener("click", e => {
+      const timerKey = e.target.getAttribute("data-timer");
+      stopTaskTimer(timerKey);
+    });
+  });
+  document.querySelectorAll(".resetBtn").forEach(btn => {
+    btn.addEventListener("click", e => {
+      const timerKey = e.target.getAttribute("data-timer");
+      resetTaskTimer(timerKey);
+    });
+  });
+
+  // Popup close button
+  popupCloseBtn.addEventListener("click", () => {
+    hidePopup();
+  });
+
+  // Update roll table display for selected phase
+  function updateRollTableDisplay() {
+    const phase = phaseSelect.value;
+    currentPhaseName.textContent = phase.charAt(0).toUpperCase() + phase.slice(1) + " Phase";
+    rollTableBody.innerHTML = "";
+    const table = taskTables[phase];
+    for (let roll = 1; roll <= 20; roll++) {
+      const tr = document.createElement("tr");
+      const tdRoll = document.createElement("td");
+      tdRoll.textContent = roll;
+      const tdTask = document.createElement("td");
+      tdTask.textContent = table[roll];
+      tr.appendChild(tdRoll);
+      tr.appendChild(tdTask);
+      rollTableBody.appendChild(tr);
+    }
+
+    // Update massage table for current phase
+    massageTableBody.innerHTML = "";
+    const massageTable = massageTables[phase];
+    for (let roll = 1; roll <= 6; roll++) {
+      const tr = document.createElement("tr");
+      const tdRoll = document.createElement("td");
+      tdRoll.textContent = roll;
+      const tdPart = document.createElement("td");
+      tdPart.textContent = massageTable[roll];
+      tr.appendChild(tdRoll);
+      tr.appendChild(tdPart);
+      massageTableBody.appendChild(tr);
+    }
+  }
+
+  // Reset timers and UI on phase change
+  phaseSelect.addEventListener("change", () => {
+    clearInterval(phaseTimerInterval);
+    resetPhaseTimer();
+    startPhaseTimer();
+    rollResult.textContent = "";
+    massageResult.textContent = "";
+    d6Dice.textContent = "-";
+    d20Dice.textContent = "-";
+    updateRollTableDisplay();
+  });
+
+  // Initialize displays and timers on page load
+  updatePhaseTimerDisplay();
+  resetTaskTimer("task");
+  resetTaskTimer("short");
+  startPhaseTimer();
+  updateRollTableDisplay();
+</script>
+
